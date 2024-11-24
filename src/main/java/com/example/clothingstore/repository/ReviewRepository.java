@@ -8,6 +8,7 @@ import java.util.List;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
+
     List<Review> findByProductId(Long productId);
 
     long countByCustomerIdAndProductCategoryId(Long customerId, Long categoryId);

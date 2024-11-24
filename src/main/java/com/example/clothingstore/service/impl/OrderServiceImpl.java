@@ -1,40 +1,48 @@
 package com.example.clothingstore.service.impl;
 
+import com.example.clothingstore.dto.OrderDTO;
 import com.example.clothingstore.entity.Order;
-import com.example.clothingstore.repository.OrderItemRepository;
 import com.example.clothingstore.repository.OrderRepository;
 import com.example.clothingstore.service.OrderService;
-
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, OrderItemRepository orderItemRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, ModelMapper modelMapper) {
         this.orderRepository = orderRepository;
-        this.orderItemRepository = orderItemRepository;
+        this.modelMapper = modelMapper;
     }
 
     @Override
-    public List<Order> getAllOrders() {
-        return orderRepository.findAll();
+    public List<OrderDTO> getAllOrders() {
+        return orderRepository.findAll()
+                .stream()
+                .map(order -> modelMapper.map(order, OrderDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<Order> getOrderById(Long id) {
-        return orderRepository.findById(id);
+    public Optional<OrderDTO> getOrderById(Long id) {
+        return orderRepository.findById(id)
+                .map(order -> modelMapper.map(order, OrderDTO.class));
     }
 
     @Override
-    public Order saveOrder(Order order) {
-        return orderRepository.save(order);
+    public OrderDTO saveOrder(OrderDTO orderDTO) {
+        Order order = modelMapper.map(orderDTO, Order.class);
+        Order savedOrder = orderRepository.save(order);
+        return modelMapper.map(savedOrder, OrderDTO.class);
     }
 
     @Override
