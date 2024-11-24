@@ -10,21 +10,17 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
-
     private final CustomerRepository customerRepository;
     private final OrderRepository orderRepository;
     private final ReviewRepository reviewRepository;
     private final ModelMapper modelMapper;
 
     @Autowired
-    public CustomerServiceImpl(CustomerRepository customerRepository, OrderRepository orderRepository,
-                               ReviewRepository reviewRepository, ModelMapper modelMapper) {
+    public CustomerServiceImpl(CustomerRepository customerRepository, OrderRepository orderRepository, ReviewRepository reviewRepository, ModelMapper modelMapper) {
         this.customerRepository = customerRepository;
         this.orderRepository = orderRepository;
         this.reviewRepository = reviewRepository;
@@ -32,16 +28,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<CustomerDTO> getAllCustomers() {
-        return customerRepository.findAll()
-                .stream()
-                .map(customer -> modelMapper.map(customer, CustomerDTO.class))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Optional<CustomerDTO> getCustomerById(Long id) {
-        return customerRepository.findById(id)
+    public Optional<CustomerDTO> getCustomerById(Long customerId) {
+        return customerRepository.findById(customerId)
                 .map(customer -> modelMapper.map(customer, CustomerDTO.class));
     }
 
@@ -53,31 +41,17 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void deleteCustomer(Long customerId) {
+    public boolean isEligibleForCategoryDiscount(Long customerId, Long categoryId) {
+        long reviewCount = reviewRepository.countByCustomerIdAndProductCategoryId(customerId, categoryId);
+        return reviewCount >= 5;
+    }
+
+    @Override
+    public void deleteCustomerIfNoOrders(Long customerId) {
         if (orderRepository.findByCustomerId(customerId).isEmpty()) {
             customerRepository.deleteById(customerId);
         } else {
             throw new IllegalStateException("Нельзя удалить клиента с активными заказами.");
         }
-    }
-
-    @Override
-    public boolean eligibleForCategoryDiscount(Long customerId, Long categoryId) {
-        long reviewCount = reviewRepository.countByCustomerIdAndProductCategoryId(customerId, categoryId);
-        return reviewCount >= 5; // Порог для скидки
-    }
-
-    @Override
-    public double calculateCustomerAverageOrderValue(Long customerId) {
-        List<com.example.clothingstore.entity.Order> orders = orderRepository.findByCustomerId(customerId);
-        return orders.stream()
-                .mapToDouble(order -> order.getTotal()) // Преобразуем в сумму
-                .average()
-                .orElse(0.0);
-    }
-
-    @Override
-    public long countCustomerOrders(Long customerId) {
-        return orderRepository.findByCustomerId(customerId).size();
     }
 }
