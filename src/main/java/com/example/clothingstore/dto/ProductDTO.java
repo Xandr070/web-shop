@@ -3,9 +3,20 @@ package com.example.clothingstore.dto;
 public class ProductDTO {
     private Long id;
     private String name;
-    private double price;
-    private int stock;
+    private Double price;
+    private Integer stock;
     private String categoryName;
+
+    public ProductDTO(Long id, String name, Double price, Integer stock, String categoryName) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.stock = stock;
+        this.categoryName = categoryName;
+    }
+
+    public ProductDTO() {
+    }
 
     public Long getId() {
         return id;
@@ -23,19 +34,19 @@ public class ProductDTO {
         this.name = name;
     }
 
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public int getStock() {
+    public Integer getStock() {
         return stock;
     }
 
-    public void setStock(int stock) {
+    public void setStock(Integer stock) {
         this.stock = stock;
     }
 
