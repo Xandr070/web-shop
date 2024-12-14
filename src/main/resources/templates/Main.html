@@ -11,9 +11,7 @@
     <h1 class="store-title">Clothing Store</h1>
     <div>
         <button class="header-button" type="button" onclick="window.location.href='/popular-products'">Сезон</button>
-
-
-        <button class="header-button" type="button" th:onclick="|window.location.href='/user-reviews?customerId=2'|">Персональные скидки
+        <button class="header-button" type="button" th:onclick="|window.location.href='/user-reviews?customerId=${CustomerId}'|">Персональные скидки
         </button>
         <button class="profile-button" type="button">П</button>
     </div>

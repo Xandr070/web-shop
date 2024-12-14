@@ -13,7 +13,6 @@
 </header>
 
 <main>
-    <!-- Информация о товаре -->
     <section class="product-details">
         <h2>Детали товара</h2>
         <p th:text="'Название: ' + ${product.name}">Название товара</p>
@@ -22,7 +21,13 @@
         <p th:text="'В наличии: ' + ${product.stock}">Количество на складе</p>
     </section>
 
-    <!-- Связанные товары -->
+    <form th:action="@{/cart/add}" method="post">
+        <input type="hidden" name="productId" th:value="${product.id}">
+        <label for="quantity">Количество:</label>
+        <input type="number" name="quantity" id="quantity" min="1" th:max="${product.stock}" required>
+        <button type="submit">Добавить в корзину</button>
+    </form>
+
     <section class="related-products">
         <h2>Товары из этой категории</h2>
         <div class="products">

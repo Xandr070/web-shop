@@ -1,14 +1,16 @@
 package com.example.clothingstore.controller;
 
+import com.example.clothingstore.service.impl.CustomerDetailsService;
+import com.example.clothingstore.service.impl.ReviewService;
+import com.example.clothingstore.service.impl.ProductService;
 import com.example.clothingstore.dto.ProductDTO;
 import com.example.clothingstore.dto.ReviewDTO;
-import com.example.clothingstore.service.impl.ProductService;
-import com.example.clothingstore.service.impl.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,8 +25,19 @@ public class UserReviewsController {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private CustomerDetailsService customerDetailsService;
+
     @GetMapping("/user-reviews")
-    public String showUserReviewsPage(@RequestParam Long customerId, Model model) {
+    public String showUserReviewsPage(Model model) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Long customerId = customerDetailsService.getCustomerIdByEmail(user.getUsername());
+
+        if (customerId == null) {
+            return "redirect:/store";
+        }
+
         Map<String, List<ReviewDTO>> reviewsByCategory = reviewService.getReviewsGroupedByCategory(customerId);
         Map<String, List<ProductDTO>> productsByCategory = new HashMap<>();
         Map<String, Boolean> categoryDiscountEligibility = new HashMap<>();
@@ -36,7 +49,6 @@ public class UserReviewsController {
             if (isEligibleForDiscount) {
                 products.forEach(product -> product.setPrice(product.getPrice() * 0.9));
             }
-
             productsByCategory.put(categoryName, products);
         });
 
