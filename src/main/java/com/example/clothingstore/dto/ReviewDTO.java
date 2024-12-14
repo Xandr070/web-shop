@@ -6,16 +6,18 @@ public class ReviewDTO {
     private String customerName;
     private Integer rating;
     private String reviewText;
+    private String categoryName;
 
     public ReviewDTO() {
     }
 
-    public ReviewDTO(Long id, String productName, String customerName, Integer rating, String reviewText) {
+    public ReviewDTO(Long id, String productName, String customerName, Integer rating, String reviewText, String categoryName) {
         this.id = id;
         this.productName = productName;
         this.customerName = customerName;
         this.rating = rating;
         this.reviewText = reviewText;
+        this.categoryName = categoryName;
     }
 
     public Long getId() {
@@ -56,5 +58,13 @@ public class ReviewDTO {
 
     public void setReviewText(String reviewText) {
         this.reviewText = reviewText;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 }

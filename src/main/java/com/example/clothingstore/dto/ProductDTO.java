@@ -6,16 +6,28 @@ public class ProductDTO {
     private Double price;
     private Integer stock;
     private String categoryName;
+    private Long categoryId;
+    private Integer soldQuantity;
+    private double oldPrice;
 
-    public ProductDTO(Long id, String name, Double price, Integer stock, String categoryName) {
+    public ProductDTO(Long id, String name, Double price, Integer stock, String categoryName, Long categoryId) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.stock = stock;
         this.categoryName = categoryName;
+        this.categoryId = categoryId;
     }
 
     public ProductDTO() {
+    }
+
+    public double getOldPrice() {
+        return oldPrice;
+    }
+
+    public void setOldPrice(double oldPrice) {
+        this.oldPrice = oldPrice;
     }
 
     public Long getId() {
@@ -56,5 +68,21 @@ public class ProductDTO {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public Integer getSoldQuantity() {
+        return soldQuantity;
+    }
+
+    public void setSoldQuantity(Integer soldQuantity) {
+        this.soldQuantity = soldQuantity;
     }
 }

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Reviews</title>
+</head>
+<body>
+
+<h1>Your Reviews</h1>
+
+<!-- Проходим по категориям и отображаем отзывы и товары -->
+<div th:each="entry : ${reviewsByCategory}">
+    <!-- Название категории -->
+    <h2 th:text="${entry.key}">Category Name</h2>
+
+    <!-- Отображаем отзывы для каждой категории -->
+    <h3>Отзывы</h3>
+    <ul>
+        <th:block th:each="review : ${entry.value}">
+            <li>
+                <strong th:text="${review.productName}">Product Name</strong>:
+                <span th:text="${review.rating}">Rating</span> -
+                <em th:text="${review.reviewText}">Review Text</em>
+            </li>
+        </th:block>
+    </ul>
+
+    <!-- Отображаем товары для этой категории -->
+    <h3>Товары</h3>
+    <ul>
+        <th:block th:each="product : ${productsByCategory[entry.key]}">
+            <li>
+                <strong th:text="${product.name}">Product Name</strong> -
+                <span th:text="${product.price}">Price</span>
+                <a th:href="@{/product(productId=${product.id})}">Посмотреть товар</a>
+            </li>
+        </th:block>
+    </ul>
+
+    <!-- Сообщение, если товары с скидкой -->
+    <th:block th:if="${categoryDiscountEligibility[entry.key]}">
+        <p>Для этой категории товаров применена скидка!</p>
+    </th:block>
+
+</div>
+
+</body>
+</html>

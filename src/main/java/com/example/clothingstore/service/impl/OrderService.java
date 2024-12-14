@@ -1,16 +1,18 @@
 package com.example.clothingstore.service.impl;
 
-import com.example.clothingstore.dto.OrderDTO;
-import com.example.clothingstore.dto.OrderItemDTO;
+import com.example.clothingstore.dto.ProductDTO;
 import com.example.clothingstore.entity.Order;
 import com.example.clothingstore.entity.OrderItem;
+import com.example.clothingstore.entity.Product;
 import com.example.clothingstore.repository.OrderRepository;
-import org.modelmapper.ModelMapper;
+import com.example.clothingstore.repository.OrderItemRepository;
+import com.example.clothingstore.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,73 +22,51 @@ public class OrderService {
     private OrderRepository orderRepository;
 
     @Autowired
-    private ModelMapper modelMapper;
+    private ProductRepository productRepository;
 
-    private OrderItemDTO convertToOrderItemDTO(OrderItem orderItem) {
-        OrderItemDTO orderItemDTO = new OrderItemDTO();
-        orderItemDTO.setId(orderItem.getId());
-        orderItemDTO.setProductName(orderItem.getProduct().getName());
-        orderItemDTO.setQuantity(orderItem.getQuantity());
-        orderItemDTO.setPrice(orderItem.getPrice());
-        orderItemDTO.setSubtotal(orderItem.getQuantity() * orderItem.getPrice());
-        return orderItemDTO;
-    }
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
-    private OrderDTO convertToDTO(Order order) {
-        OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
+    public List<ProductDTO> getPopularProductsForSeason(String season) {
+        LocalDateTime seasonStart = getSeasonStart(season);
+        LocalDateTime seasonEnd = seasonStart.plusMonths(3);
 
-        orderDTO.setCustomerName(order.getCustomer().getName());
-        List<OrderItemDTO> orderItemDTOs = order.getOrderItems().stream()
-                .map(this::convertToOrderItemDTO)
-                .collect(Collectors.toList());
-        orderDTO.setOrderItems(orderItemDTOs);
+        List<Order> orders = orderRepository.findByOrderDateBetween(seasonStart, seasonEnd);
 
-        List<String> productNames = order.getOrderItems().stream()
-                .map(orderItem -> orderItem.getProduct().getName())
-                .collect(Collectors.toList());
-        orderDTO.setProductNames(productNames);
-
-        return orderDTO;
-    }
-
-    private Order convertToEntity(OrderDTO orderDTO) {
-        return modelMapper.map(orderDTO, Order.class);
-    }
-
-    public List<OrderDTO> getAllOrders() {
-        return orderRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<OrderDTO> getOrdersByCustomer(Long customerId) {
-        return orderRepository.findByCustomerId(customerId).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    public Optional<OrderDTO> getOrderById(Long orderId) {
-        return orderRepository.findById(orderId)
-                .map(this::convertToDTO);
-    }
-
-    public OrderDTO createOrder(OrderDTO orderDTO) {
-        Order order = convertToEntity(orderDTO);
-        Order savedOrder = orderRepository.save(order);
-        return convertToDTO(savedOrder);
-    }
-
-    public OrderDTO updateOrder(Long orderId, OrderDTO updatedOrderDTO) {
-        if (orderRepository.existsById(orderId)) {
-            Order updatedOrder = convertToEntity(updatedOrderDTO);
-            updatedOrder.setId(orderId);
-            Order savedOrder = orderRepository.save(updatedOrder);
-            return convertToDTO(savedOrder);
+        Map<Long, Integer> productQuantities = new HashMap<>();
+        for (Order order : orders) {
+            for (OrderItem orderItem : order.getOrderItems()) {
+                productQuantities.put(orderItem.getProduct().getId(),
+                        productQuantities.getOrDefault(orderItem.getProduct().getId(), 0) + orderItem.getQuantity());
+            }
         }
-        return null;
+
+        List<ProductDTO> popularProducts = productQuantities.entrySet().stream()
+                .map(entry -> {
+                    Product product = productRepository.findById(entry.getKey()).orElse(null);
+                    if (product != null) {
+                        ProductDTO productDTO = new ProductDTO(product.getId(), product.getName(), product.getPrice(),
+                                product.getStock(), product.getCategory().getName(), product.getCategory().getId());
+                        productDTO.setSoldQuantity(entry.getValue());
+                        return productDTO;
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparingInt(ProductDTO::getSoldQuantity).reversed())
+                .collect(Collectors.toList());
+
+        return popularProducts;
     }
 
-    public void deleteOrder(Long orderId) {
-        orderRepository.deleteById(orderId);
+    private LocalDateTime getSeasonStart(String season) {
+        int year = LocalDateTime.now().getYear();
+        return switch (season) {
+            case "Spring" -> LocalDateTime.of(year, Month.MARCH, 1, 0, 0, 0, 0);
+            case "Summer" -> LocalDateTime.of(year, Month.JUNE, 1, 0, 0, 0, 0);
+            case "Autumn" -> LocalDateTime.of(year, Month.SEPTEMBER, 1, 0, 0, 0, 0);
+            case "Winter" -> LocalDateTime.of(year, Month.DECEMBER, 1, 0, 0, 0, 0);
+            default -> throw new IllegalArgumentException("Unknown season: " + season);
+        };
     }
 }

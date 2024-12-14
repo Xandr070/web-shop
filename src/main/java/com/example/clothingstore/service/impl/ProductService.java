@@ -23,9 +23,11 @@ public class ProductService {
     private ProductDTO convertToDTO(Product product) {
         ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
         productDTO.setCategoryName(product.getCategory().getName());
-
+        productDTO.setCategoryId(product.getCategory().getId()); // Установите categoryId
         return productDTO;
     }
+
+
 
     public List<ProductDTO> getAllProducts() {
         return productRepository.findAll().stream()
@@ -62,6 +64,18 @@ public class ProductService {
             return convertToDTO(savedProduct);
         }
         return null;
+    }
+
+    public List<ProductDTO> getProductsByCategoryName(String categoryName) {
+        return productRepository.findByCategoryName(categoryName).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+
+    public Optional<ProductDTO> getProductByName(String productName) {
+        return productRepository.findByName(productName)
+                .map(this::convertToDTO);
     }
 
     public void deleteProduct(Long productId) {

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.name}">Product Details</title>
+    <link rel="stylesheet" th:href="@{/Main.css}">
+</head>
+<body>
+<header>
+    <h1 th:text="${product.name}">Product</h1>
+    <a href="/store">Вернуться в магазин</a>
+</header>
+
+<main>
+    <!-- Информация о товаре -->
+    <section class="product-details">
+        <h2>Детали товара</h2>
+        <p th:text="'Название: ' + ${product.name}">Название товара</p>
+        <p th:text="'Категория: ' + ${product.categoryName}">Категория</p>
+        <p th:text="'Цена: ' + ${product.price}">Цена</p>
+        <p th:text="'В наличии: ' + ${product.stock}">Количество на складе</p>
+    </section>
+
+    <!-- Связанные товары -->
+    <section class="related-products">
+        <h2>Товары из этой категории</h2>
+        <div class="products">
+            <div th:each="relatedProduct : ${relatedProducts}">
+                <div class="product">
+                    <a th:href="@{/product(productId=${relatedProduct.id})}">
+                        <span th:text="${relatedProduct.name}">Название товара</span>
+                    </a>
+                    <p th:text="'Цена: ' + ${relatedProduct.price}">Цена</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>
