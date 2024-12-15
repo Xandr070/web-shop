@@ -5,6 +5,103 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${product.name}">Product Details</title>
     <link rel="stylesheet" th:href="@{/Main.css}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #D7EEFF;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #028F84;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+
+        .product-details, .related-products {
+            margin-bottom: 2rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+        }
+
+        .product-details h2, .related-products h2 {
+            color: #028F84;
+        }
+
+        .product-details p, .related-products .product {
+            margin: 0.5rem 0;
+        }
+
+        .form-container {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        form label, form input, form button {
+            margin-bottom: 0.5rem;
+        }
+
+        form button {
+            background-color: #028F84;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        form button:hover {
+            background-color: #026E6A;
+        }
+
+        .products {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .product {
+            background-color: #ffffff;
+            border: 1px solid #cccccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            text-align: center;
+            width: 200px;
+        }
+
+        .product a {
+            text-decoration: none;
+            color: #028F84;
+            font-weight: bold;
+        }
+
+        .product a:hover {
+            text-decoration: underline;
+        }
+
+        .product p {
+            margin: 0.5rem 0;
+            color: #333333;
+        }
+    </style>
 </head>
 <body>
 <header>
@@ -15,18 +112,19 @@
 <main>
     <section class="product-details">
         <h2>Детали товара</h2>
-        <p th:text="'Название: ' + ${product.name}">Название товара</p>
-        <p th:text="'Категория: ' + ${product.categoryName}">Категория</p>
-        <p th:text="'Цена: ' + ${product.price}">Цена</p>
-        <p th:text="'В наличии: ' + ${product.stock}">Количество на складе</p>
+        <p><strong>Название:</strong> <span th:text="${product.name}">Название товара</span></p>
+        <p><strong>Категория:</strong> <span th:text="${product.categoryName}">Категория</span></p>
+        <p><strong>Цена:</strong> <span th:text="${product.price}">Цена</span> руб.</p>
+        <p><strong>В наличии:</strong> <span th:text="${product.stock}">Количество на складе</span></p>
     </section>
-
-    <form th:action="@{/cart/add}" method="post">
-        <input type="hidden" name="productId" th:value="${product.id}">
-        <label for="quantity">Количество:</label>
-        <input type="number" name="quantity" id="quantity" min="1" th:max="${product.stock}" required>
-        <button type="submit">Добавить в корзину</button>
-    </form>
+    <section class="form-container">
+        <form th:action="@{/cart/add}" method="post">
+            <input type="hidden" name="productId" th:value="${product.id}">
+            <label for="quantity"><strong>Количество:</strong></label>
+            <input type="number" name="quantity" id="quantity" min="1" th:max="${product.stock}" required>
+            <button type="submit">Добавить в корзину</button>
+        </form>
+    </section>
 
     <section class="related-products">
         <h2>Товары из этой категории</h2>
@@ -36,7 +134,7 @@
                     <a th:href="@{/product(productId=${relatedProduct.id})}">
                         <span th:text="${relatedProduct.name}">Название товара</span>
                     </a>
-                    <p th:text="'Цена: ' + ${relatedProduct.price}">Цена</p>
+                    <p><strong>Цена:</strong> <span th:text="${relatedProduct.price}">Цена</span> руб.</p>
                 </div>
             </div>
         </div>

@@ -11,6 +11,7 @@ public class Order {
     private Customer customer;
     private LocalDateTime orderDate;
     private Double total;
+    private OrderStatus status;
     private List<OrderItem> orderItems;
 
     @Id
@@ -49,7 +50,17 @@ public class Order {
         this.total = total;
     }
 
-    @OneToMany(mappedBy = "order")
+    @Column(nullable = false, name="status")
+    @Enumerated(EnumType.STRING)
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     public List<OrderItem> getOrderItems() {
         return orderItems;
     }

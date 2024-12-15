@@ -1,5 +1,7 @@
 package com.example.clothingstore.dto;
 
+import com.example.clothingstore.entity.OrderStatus;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -10,17 +12,27 @@ public class OrderDTO {
     private Double total;
     private List<String> productNames;
     private List<OrderItemDTO> orderItems;
+    private OrderStatus status;
 
-    public OrderDTO(Long id, String customerName, LocalDateTime orderDate, Double total, List<String> productNames, List<OrderItemDTO> orderItems) {
+    public OrderDTO(Long id, String customerName, LocalDateTime orderDate, Double total, List<String> productNames, List<OrderItemDTO> orderItems, OrderStatus status) {
         this.id = id;
         this.customerName = customerName;
         this.orderDate = orderDate;
         this.total = total;
         this.productNames = productNames;
         this.orderItems = orderItems;
+        this.status = status;
     }
 
     public OrderDTO() {
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
     }
 
     public Long getId() {

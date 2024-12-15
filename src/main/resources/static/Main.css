@@ -84,6 +84,7 @@ header {
 }
 
 .products {
+    margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(3, 300px);
     gap: 20px;

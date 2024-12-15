@@ -1,12 +1,8 @@
 package com.example.clothingstore.service.impl;
 
 import com.example.clothingstore.dto.ReviewDTO;
-import com.example.clothingstore.entity.Order;
-import com.example.clothingstore.entity.OrderItem;
-import com.example.clothingstore.entity.Product;
-import com.example.clothingstore.entity.Review;
-import com.example.clothingstore.repository.OrderRepository;
-import com.example.clothingstore.repository.ReviewRepository;
+import com.example.clothingstore.entity.*;
+import com.example.clothingstore.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +19,33 @@ public class ReviewService {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    public void addReview(Long customerId, Long productId, int rating, String reviewText) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        Review review = new Review();
+        review.setCustomer(customer);
+        review.setProduct(product);
+        review.setRating(rating);
+        review.setReviewText(reviewText);
+
+        reviewRepository.save(review);
+    }
+
+    public boolean checkIfReviewExists(Long customerId, Long productId) {
+        List<Review> existingReviews = reviewRepository.findByCustomerIdAndProductId(customerId, productId);
+        return !existingReviews.isEmpty();
+    }
+
     public Map<String, List<ReviewDTO>> getReviewsGroupedByCategory(Long customerId) {
         List<Order> orders = orderRepository.findByCustomerId(customerId);
         List<Product> products = orders.stream()
@@ -31,11 +54,7 @@ public class ReviewService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        System.out.println("Products for customer ID " + customerId + ": " + products);
-
         List<Review> reviews = reviewRepository.findByProductIn(products);
-
-        System.out.println("Reviews for customer ID " + customerId + ": " + reviews);
 
         return reviews.stream()
                 .collect(Collectors.groupingBy(
@@ -43,7 +62,6 @@ public class ReviewService {
                         Collectors.mapping(this::convertToReviewDTO, Collectors.toList())
                 ));
     }
-
 
     private ReviewDTO convertToReviewDTO(Review review) {
         return new ReviewDTO(

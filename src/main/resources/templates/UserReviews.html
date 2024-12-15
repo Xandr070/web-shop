@@ -3,46 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Reviews</title>
+    <title>User Reviews</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #D7EEFF;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #028F84;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+        }
+        .container {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 1200px;
+        }
+        .category-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #028F84;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .category-title {
+            font-size: 24px;
+            color: #028F84;
+            border-bottom: 2px solid #028F84;
+            padding-bottom: 5px;
+        }
+        .subsection-title {
+            font-size: 18px;
+            color: #028F84;
+            margin-top: 20px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            margin-bottom: 10px;
+        }
+        ul li strong {
+            font-weight: bold;
+            color: #028F84;
+        }
+        ul li span {
+            font-weight: bold;
+        }
+        a {
+            color: #028F84;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .discount-message {
+            background-color: #D7EEFF;
+            color: #028F84;
+            font-weight: bold;
+            padding: 10px;
+            margin-top: 15px;
+            border: 1px dashed #028F84;
+            border-radius: 8px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
 
-<h1>Your Reviews</h1>
+<header>
+    <h1>Ваши отзывы и скидки</h1>
+</header>
 
-<!-- Проходим по категориям и отображаем отзывы и товары -->
-<div th:each="entry : ${reviewsByCategory}">
-    <!-- Название категории -->
-    <h2 th:text="${entry.key}">Category Name</h2>
+<div class="container">
+    <div th:each="entry : ${reviewsByCategory}" class="category-section">
+        <h2 th:text="${entry.key}" class="category-title">Category Name</h2>
 
-    <!-- Отображаем отзывы для каждой категории -->
-    <h3>Отзывы</h3>
-    <ul>
-        <th:block th:each="review : ${entry.value}">
-            <li>
-                <strong th:text="${review.productName}">Product Name</strong>:
-                <span th:text="${review.rating}">Rating</span> -
-                <em th:text="${review.reviewText}">Review Text</em>
-            </li>
+        <h3 class="subsection-title">Отзывы</h3>
+        <ul>
+            <th:block th:each="review : ${entry.value}">
+                <li>
+                    <strong th:text="${review.productName}">Product Name</strong>:
+                    <span th:text="${review.rating}">Rating</span> -
+                    <em th:text="${review.reviewText}">Review Text</em>
+                </li>
+            </th:block>
+        </ul>
+        <h3 class="subsection-title">Товары</h3>
+        <ul>
+            <th:block th:each="product : ${productsByCategory[entry.key]}">
+                <li>
+                    <strong th:text="${product.name}">Product Name</strong> -
+                    <span th:text="${product.price}">Price</span>
+                    <a th:href="@{/product(productId=${product.id})}">Посмотреть товар</a>
+                </li>
+            </th:block>
+        </ul>
+        <th:block th:if="${categoryDiscountEligibility[entry.key]}">
+            <div class="discount-message">
+                Для этой категории товаров применена скидка!
+            </div>
         </th:block>
-    </ul>
-
-    <!-- Отображаем товары для этой категории -->
-    <h3>Товары</h3>
-    <ul>
-        <th:block th:each="product : ${productsByCategory[entry.key]}">
-            <li>
-                <strong th:text="${product.name}">Product Name</strong> -
-                <span th:text="${product.price}">Price</span>
-                <a th:href="@{/product(productId=${product.id})}">Посмотреть товар</a>
-            </li>
-        </th:block>
-    </ul>
-
-    <!-- Сообщение, если товары с скидкой -->
-    <th:block th:if="${categoryDiscountEligibility[entry.key]}">
-        <p>Для этой категории товаров применена скидка!</p>
-    </th:block>
-
+    </div>
 </div>
 
 </body>

@@ -1,9 +1,10 @@
 package com.example.clothingstore.service.impl;
 
+import com.example.clothingstore.dto.OrderDTO;
+import com.example.clothingstore.dto.OrderItemDTO;
 import com.example.clothingstore.dto.ProductDTO;
-import com.example.clothingstore.entity.Order;
-import com.example.clothingstore.entity.OrderItem;
-import com.example.clothingstore.entity.Product;
+import com.example.clothingstore.entity.*;
+import com.example.clothingstore.repository.CustomerRepository;
 import com.example.clothingstore.repository.OrderRepository;
 import com.example.clothingstore.repository.OrderItemRepository;
 import com.example.clothingstore.repository.ProductRepository;
@@ -26,6 +27,9 @@ public class OrderService {
 
     @Autowired
     private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
 
     public List<ProductDTO> getPopularProductsForSeason(String season) {
         LocalDateTime seasonStart = getSeasonStart(season);
@@ -57,6 +61,85 @@ public class OrderService {
                 .collect(Collectors.toList());
 
         return popularProducts;
+    }
+
+    public Order addProductToUnconfirmedOrder(Long customerId, Long productId, int quantity) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        if (product.getStock() < quantity) {
+            throw new IllegalStateException("Not enough stock available");
+        }
+        Order order = orderRepository.findByCustomerAndStatus(customer, OrderStatus.UNCONFIRMED)
+                .orElseGet(() -> {
+                    Order newOrder = new Order();
+                    newOrder.setCustomer(customer);
+                    newOrder.setStatus(OrderStatus.UNCONFIRMED);
+                    newOrder.setOrderDate(LocalDateTime.now());
+                    newOrder.setTotal(0.0);
+                    return orderRepository.save(newOrder);
+                });
+
+        OrderItem orderItem = new OrderItem();
+        orderItem.setOrder(order);
+        orderItem.setProduct(product);
+        orderItem.setQuantity(quantity);
+        orderItem.setPrice(product.getPrice());
+        orderItemRepository.save(orderItem);
+        product.setStock(product.getStock() - quantity);
+        productRepository.save(product);
+
+        double newTotal = order.getTotal() + product.getPrice() * quantity;
+        order.setTotal(newTotal);
+        orderRepository.save(order);
+
+        return order;
+    }
+
+    public List<OrderItemDTO> getOrderItemsByOrderId(Long orderId) {
+        List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
+        return orderItems.stream().map(orderItem -> {
+            OrderItemDTO dto = new OrderItemDTO();
+            dto.setId(orderItem.getId());
+            dto.setProductId(orderItem.getProduct() != null ? orderItem.getProduct().getId() : null);
+            dto.setProductName(orderItem.getProduct() != null ? orderItem.getProduct().getName() : "Unknown");
+            dto.setQuantity(orderItem.getQuantity());
+            dto.setPrice(orderItem.getPrice());
+            dto.setSubtotal(orderItem.getSubtotal() != null ? orderItem.getSubtotal() : 0.0); // Обработка null
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    public List<OrderDTO> getOrdersByCustomerAndStatus(Long customerId, OrderStatus status) {
+        List<Order> orders = orderRepository.findByCustomerAndStatusOrderByOrderDateDesc(
+                customerRepository.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found")),
+                status
+        );
+        return orders.stream()
+                .map(order -> {
+                    OrderDTO orderDTO = new OrderDTO();
+                    orderDTO.setId(order.getId());
+                    orderDTO.setTotal(order.getTotal());
+                    orderDTO.setOrderDate(order.getOrderDate());
+                    orderDTO.setStatus(order.getStatus());
+                    return orderDTO;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public void confirmOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (!order.getStatus().equals(OrderStatus.UNCONFIRMED)) {
+            throw new IllegalStateException("Only unconfirmed orders can be confirmed");
+        }
+
+        order.setStatus(OrderStatus.CONFIRMED);
+        orderRepository.save(order);
     }
 
     private LocalDateTime getSeasonStart(String season) {

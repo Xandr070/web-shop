@@ -11,11 +11,16 @@
     <h1 class="store-title">Clothing Store</h1>
     <div>
         <button class="header-button" type="button" onclick="window.location.href='/popular-products'">Сезон</button>
-        <button class="header-button" type="button" th:onclick="|window.location.href='/user-reviews?customerId=${CustomerId}'|">Персональные скидки
+        <button class="header-button" type="button" th:onclick="|window.location.href='/user-reviews?customerId=${CustomerId}'|">
+            Персональные скидки
         </button>
-        <button class="profile-button" type="button">П</button>
+        <button class="profile-button" type="button" th:onclick="|window.location.href='/profile'|">П</button>
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+            <button class="header-button" type="submit">Выйти</button>
+        </form>
     </div>
 </header>
+
 
 <main>
     <section class="categories">

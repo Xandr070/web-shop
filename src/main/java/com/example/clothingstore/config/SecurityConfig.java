@@ -33,7 +33,7 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/store")
+                        .logoutSuccessUrl("/login")
                         .invalidateHttpSession(true)
                         .permitAll()
                 )
