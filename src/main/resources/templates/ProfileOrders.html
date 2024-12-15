@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #D7EEFF;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #028F84;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+        }
+        .container {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 1200px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .orders {
+            margin-top: 30px;
+        }
+        .orders h2 {
+            color: #028F84;
+            margin-bottom: 15px;
+        }
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .order-table th, .order-table td {
+            border: 1px solid #028F84;
+            padding: 10px;
+            text-align: left;
+        }
+        .order-table th {
+            background-color: #028F84;
+            color: white;
+        }
+        .order-table tr:nth-child(even) {
+            background-color: #D7EEFF;
+        }
+        .order-table tr:hover {
+            background-color: #b5e2d7;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Профиль пользователя</h1>
+</header>
+
+<div class="container">
+    <div class="orders">
+        <h2>Неподтвержденные заказы</h2>
+        <table class="order-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Дата заказа</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+                <th>Подтвердить</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="order : ${unconfirmedOrders}">
+                <td th:text="${order.id}">1</td>
+                <td th:text="${order.total}">100.50</td>
+                <td th:text="${order.status}">Не подтвержден</td>
+                <td>
+                    <form th:action="@{/confirm-order}" method="post">
+                        <input type="hidden" th:value="${order.id}" name="orderId"/>
+                        <button type="submit">Подтвердить</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="orders">
+        <h2>Подтвержденные заказы</h2>
+        <table class="order-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Дата заказа</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="order : ${confirmedOrders}">
+                <td th:text="${order.id}">1</td>
+                <td th:text="${#dates.format(order.orderDate, 'yyyy-MM-dd')}">2024-12-15</td>
+                <td th:text="${order.total}">150.75</td>
+                <td th:text="${order.status}">Подтвержден</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

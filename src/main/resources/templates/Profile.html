@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F0F8FF;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #028F84;
+            color: white;
+            padding: 15px 20px;
+        }
+        header h1, header a {
+            margin: 0;
+        }
+        header a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        header a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 1200px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .profile-info, .orders {
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #028F84;
+            margin-bottom: 10px;
+        }
+        p {
+            margin: 5px 0;
+        }
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .order-table th, .order-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .order-table th {
+            background-color: #028F84;
+            color: white;
+        }
+        .order-table tr:nth-child(even) {
+            background-color: #F0F8FF;
+        }
+        .order-table tr:hover {
+            background-color: #D9F0EA;
+        }
+        .product-card {
+            background-color: #F9F9F9;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+        }
+        .product-card h4 {
+            margin: 0 0 5px 0;
+            color: #028F84;
+        }
+        .product-card p {
+            margin: 0;
+        }
+        textarea, input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        label {
+            font-weight: bold;
+        }
+        button {
+            background-color: #028F84;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #026A62;
+        }
+        .error-message {
+            color: #c6ac37;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Профиль пользователя</h1>
+    <a href="/store">На главную</a>
+</header>
+
+<div class="container">
+    <div class="profile-info">
+        <h2>Информация о клиенте</h2>
+        <p><strong>Имя:</strong> <span th:text="${customer.name}">John Doe</span></p>
+        <p><strong>Email:</strong> <span th:text="${customer.email}">john.doe@example.com</span></p>
+        <p><strong>Телефон:</strong> <span th:text="${customer.phone}">+1234567890</span></p>
+    </div>
+    <div class="orders">
+        <h2>Неподтвержденные заказы</h2>
+        <table class="order-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Дата заказа</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+                <th>Товары</th>
+                <th>Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="order : ${unconfirmedOrders}">
+                <td th:text="${order.id}">1</td>
+                <td th:text="${order.orderDate}">2024-12-15</td>
+                <td th:text="${order.total}">150.75</td>
+                <td th:text="${order.status}">Неподтвержден</td>
+                <td>
+                    <div th:each="item : ${order.orderItems}" class="product-card">
+                        <h4 th:text="${item.productName}">Пример товара</h4>
+                        <p>Количество: <span th:text="${item.quantity}">1</span></p>
+                        <p>Цена: <span th:text="${item.price}">150.00</span> руб.</p>
+                    </div>
+                </td>
+                <td>
+                    <form th:action="@{/profile/confirm-order}" method="post">
+                        <input type="hidden" th:value="${order.id}" name="orderId"/>
+                        <button type="submit">Подтвердить заказ</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="orders">
+        <h2>Подтвержденные заказы</h2>
+
+        <div th:if="${exception != null}" class="error-message">
+            <p th:text="${exception}"></p>
+        </div>
+
+        <table class="order-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Дата заказа</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+                <th>Товары</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="order : ${confirmedOrders}">
+                <td th:text="${order.id}">1</td>
+                <td th:text="${order.orderDate}">2024-12-15</td>
+                <td th:text="${order.total}">150.75</td>
+                <td th:text="${order.status}">Подтвержден</td>
+                <td>
+                    <div th:each="item : ${order.orderItems}" class="product-card">
+                        <h4 th:text="${item.productName}">Пример товара</h4>
+                        <p>Количество: <span th:text="${item.quantity}">1</span></p>
+                        <p>Цена: <span th:text="${item.price}">150.00</span> руб.</p>
+                        <form th:action="@{/profile/add-review}" method="post">
+                            <input type="hidden" th:value="${order.id}" name="orderId"/>
+                            <input type="hidden" th:value="${item.productId}" name="productId"/>
+                            <label for="rating">Рейтинг:</label>
+                            <input type="number" id="rating" name="rating" min="1" max="5" required/>
+                            <label for="reviewText">Отзыв:</label>
+                            <textarea id="reviewText" name="reviewText" rows="3" placeholder="Напишите ваш отзыв..." required></textarea>
+                            <button type="submit">Оставить отзыв</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>
