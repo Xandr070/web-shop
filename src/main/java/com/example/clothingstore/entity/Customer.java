@@ -34,9 +34,8 @@ public class Customer {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "customer_roles", joinColumns = @JoinColumn(name = "customer_id"))
     @Column(name = "role")
-    private Set<String> roles = new HashSet<>(Collections.singleton("ROLE_USER")); // Default role
+    private Set<String> roles = new HashSet<>();
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

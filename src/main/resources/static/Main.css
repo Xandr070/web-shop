@@ -19,6 +19,11 @@ header {
     font-style: oblique;
 }
 
+.head-button {
+    display: flex;
+    flex-direction: row;
+}
+
 .categories {
     display: flex;
     flex-direction: column;
@@ -131,6 +136,7 @@ header button {
 }
 
 .profile-button {
+    padding: 0;
     width: 33px;
     height: 33px;
 }

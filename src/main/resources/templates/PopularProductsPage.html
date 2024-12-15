@@ -7,7 +7,11 @@
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<h1 style="background: #D7EEFF; display: flex; justify-content: center; align-items: center; color: #028F84; margin: 0; padding: 0 150px; height: 80px; text-align: center">Popular Products in <span th:text="${currentSeason}"></span></h1>
+<div class="head">
+    <h1>
+        Popular Products in <span th:text="${currentSeason}"></span></h1>
+    <a style="color: #028F84" href="/store">Вернуться на главную</a>
+</div>
 <div class="season">
     <div class="podium">
         <div class="podium-item">

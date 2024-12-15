@@ -101,6 +101,37 @@
             margin: 0.5rem 0;
             color: #333333;
         }
+
+        .admin-actions {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .admin-actions button {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .admin-actions button:hover {
+            background-color: #e60000;
+        }
+
+        .admin-actions a {
+            background-color: #028F84;
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+
+        .admin-actions a:hover {
+            background-color: #026A62;
+        }
     </style>
 </head>
 <body>
@@ -117,6 +148,13 @@
         <p><strong>Цена:</strong> <span th:text="${product.price}">Цена</span> руб.</p>
         <p><strong>В наличии:</strong> <span th:text="${product.stock}">Количество на складе</span></p>
     </section>
+    <div class="admin-actions" th:if="${isAdmin}">
+        <a th:href="@{/edit-product/{id}(id=${product.id})}">Редактировать товар</a>
+        <form th:action="@{/delete-product/{id}(id=${product.id})}" method="get">
+            <button type="submit">Удалить товар</button>
+        </form>
+    </div>
+
     <section class="form-container">
         <form th:action="@{/cart/add}" method="post">
             <input type="hidden" name="productId" th:value="${product.id}">

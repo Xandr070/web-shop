@@ -4,6 +4,7 @@ import com.example.clothingstore.dto.CustomerDTO;
 import com.example.clothingstore.entity.Customer;
 import com.example.clothingstore.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,13 +23,23 @@ public class CustomerDetailsService implements UserDetailsService {
     private CustomerRepository customerRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Customer customer = customerRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-        Set<SimpleGrantedAuthority> authorities = customer.getRoles().stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toSet());
-        return new User(customer.getEmail(), customer.getPassword(), authorities);
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Customer customer = customerRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        Set<String> roles = new HashSet<>();
+
+        if (customer.getEmail().contains("store")) {
+            roles.add("ROLE_ADMIN");
+        } else {
+            roles.add("ROLE_USER");
+        }
+
+        return new org.springframework.security.core.userdetails.User(
+                customer.getEmail(),
+                customer.getPassword(),
+                roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
+        );
     }
 
     public CustomerDTO getCustomerByEmail(String email) {

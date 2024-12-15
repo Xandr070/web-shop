@@ -1,6 +1,9 @@
 package com.example.clothingstore.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.OnDelete;
+
 
 @Entity
 public class OrderItem {
@@ -33,6 +36,7 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "product_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     public Product getProduct() {
         return product;
     }
@@ -65,3 +69,4 @@ public class OrderItem {
         this.subtotal = subtotal;
     }
 }
+

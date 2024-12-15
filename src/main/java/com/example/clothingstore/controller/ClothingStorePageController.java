@@ -9,6 +9,7 @@ import com.example.clothingstore.service.impl.OrderService;
 import com.example.clothingstore.service.impl.ProductService;
 import com.example.clothingstore.entity.OrderStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -40,20 +41,16 @@ public class ClothingStorePageController {
             @RequestParam(required = false) Double maxPrice,
             Model model) {
 
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username;
-
-        if (principal instanceof org.springframework.security.core.userdetails.User userDetails) {
-            username = userDetails.getUsername();
-        } else if (principal instanceof String) {
-            username = (String) principal;
-        } else {
-            throw new RuntimeException("Не удалось определить пользователя.");
-        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
 
         Long customerId = customerDetailsService.getCustomerIdByEmail(username);
 
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+
         model.addAttribute("CustomerId", customerId);
+        model.addAttribute("isAdmin", isAdmin);
 
         List<CategoryDTO> categories = categoryService.getAllCategories();
         model.addAttribute("categories", categories);
@@ -80,8 +77,14 @@ public class ClothingStorePageController {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         List<ProductDTO> relatedProducts = productService.getProductsByCategory(product.getCategoryId());
         relatedProducts.removeIf(p -> p.getId().equals(productId));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+
         model.addAttribute("product", product);
         model.addAttribute("relatedProducts", relatedProducts);
+        model.addAttribute("isAdmin", isAdmin); // Добавляем флаг isAdmin в модель
 
         return "ProductDetails";
     }

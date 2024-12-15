@@ -10,6 +10,15 @@ h1 {
     font-size: 30px;
 }
 
+.head {
+    align-items: center;
+    color: #028F84;
+    display: flex;
+    justify-content: space-between;
+    background-color: #D7EEFF;
+    padding: 0 150px;
+}
+
 .podium {
     display: flex;
     justify-content: center;

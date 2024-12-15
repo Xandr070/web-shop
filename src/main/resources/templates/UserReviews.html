@@ -11,20 +11,24 @@
             margin: 0;
             padding: 0;
         }
+
         header {
             background-color: #028F84;
             color: white;
             padding: 15px;
             text-align: center;
         }
+
         header h1 {
             margin: 0;
         }
+
         .container {
             margin: 20px auto;
             width: 90%;
             max-width: 1200px;
         }
+
         .category-section {
             margin-bottom: 30px;
             padding: 15px;
@@ -33,38 +37,47 @@
             background-color: white;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
         .category-title {
             font-size: 24px;
             color: #028F84;
             border-bottom: 2px solid #028F84;
             padding-bottom: 5px;
         }
+
         .subsection-title {
             font-size: 18px;
             color: #028F84;
             margin-top: 20px;
         }
+
         ul {
             list-style-type: none;
             padding: 0;
         }
+
         ul li {
             margin-bottom: 10px;
         }
+
         ul li strong {
             font-weight: bold;
             color: #028F84;
         }
+
         ul li span {
             font-weight: bold;
         }
+
         a {
             color: #028F84;
             text-decoration: none;
         }
+
         a:hover {
             text-decoration: underline;
         }
+
         .discount-message {
             background-color: #D7EEFF;
             color: #028F84;
@@ -75,12 +88,24 @@
             border-radius: 8px;
             text-align: center;
         }
+
+        .head {
+            align-items: center;
+            color: #028F84;
+            display: flex;
+            justify-content: space-between;
+            background-color: #D7EEFF;
+            padding: 0 150px;
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>Ваши отзывы и скидки</h1>
+    <div class="head">
+        <h1>Ваши отзывы и скидки</h1>
+        <a style="color: #028F84" href="/store">Вернуться на главную</a>
+    </div>
 </header>
 
 <div class="container">

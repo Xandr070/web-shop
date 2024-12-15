@@ -1,12 +1,17 @@
 package com.example.clothingstore.service.impl;
 
 import com.example.clothingstore.dto.ProductDTO;
+import com.example.clothingstore.entity.Category;
 import com.example.clothingstore.entity.Product;
+import com.example.clothingstore.repository.CategoryRepository;
+import com.example.clothingstore.repository.OrderItemRepository;
 import com.example.clothingstore.repository.ProductRepository;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,13 +25,25 @@ public class ProductService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
     private ProductDTO convertToDTO(Product product) {
         ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
-        productDTO.setCategoryName(product.getCategory().getName());
-        productDTO.setCategoryId(product.getCategory().getId()); // Установите categoryId
+
+        if (product.getCategory() != null) {
+            productDTO.setCategoryName(product.getCategory().getName());
+            productDTO.setCategoryId(product.getCategory().getId());
+        } else {
+            productDTO.setCategoryName("No Category");
+            productDTO.setCategoryId(null);
+        }
+
         return productDTO;
     }
-
 
 
     public List<ProductDTO> getAllProducts() {
@@ -52,19 +69,40 @@ public class ProductService {
                 .map(this::convertToDTO);
     }
 
-    public ProductDTO addProduct(Product product) {
-        Product savedProduct = productRepository.save(product);
-        return convertToDTO(savedProduct);
+    public void addProduct(ProductDTO productDTO) {
+        Product product = new Product();
+        product.setName(productDTO.getName());
+        product.setPrice(productDTO.getPrice());
+        product.setStock(productDTO.getStock());
+
+        Category category = categoryRepository.findById(productDTO.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        product.setCategory(category);
+
+        product.setCreatedAt(LocalDateTime.now());
+
+        productRepository.save(product);
     }
 
-    public ProductDTO updateProduct(Long productId, Product updatedProduct) {
-        if (productRepository.existsById(productId)) {
-            updatedProduct.setId(productId);
-            Product savedProduct = productRepository.save(updatedProduct);
-            return convertToDTO(savedProduct);
-        }
-        return null;
+
+    public ProductDTO updateProduct(Long productId, ProductDTO updatedProductDTO) {
+        Product existingProduct = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        existingProduct.setName(updatedProductDTO.getName());
+        existingProduct.setPrice(updatedProductDTO.getPrice());
+        existingProduct.setStock(updatedProductDTO.getStock());
+
+        Category category = categoryRepository.findById(updatedProductDTO.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        existingProduct.setCategory(category);
+
+        Product updatedProduct = productRepository.save(existingProduct);
+
+        return convertToDTO(updatedProduct);
     }
+
 
     public List<ProductDTO> getProductsByCategoryName(String categoryName) {
         return productRepository.findByCategoryName(categoryName).stream()
@@ -72,13 +110,11 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-
-    public Optional<ProductDTO> getProductByName(String productName) {
-        return productRepository.findByName(productName)
-                .map(this::convertToDTO);
-    }
-
+    @Transactional
     public void deleteProduct(Long productId) {
+        orderItemRepository.deleteByProductId(productId);
         productRepository.deleteById(productId);
     }
+
+
 }
