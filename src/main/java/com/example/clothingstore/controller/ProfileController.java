@@ -7,6 +7,7 @@ import com.example.clothingstore.entity.OrderStatus;
 import com.example.clothingstore.service.impl.OrderService;
 import com.example.clothingstore.service.impl.CustomerDetailsService;
 import com.example.clothingstore.service.impl.ReviewService;
+import com.example.clothingstore_contracts.controller.ProfileControllerContract;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -16,11 +17,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.security.Principal;
 import java.util.List;
 
 @Controller
-public class ProfileController {
+public class ProfileController implements ProfileControllerContract {
 
     @Autowired
     private CustomerDetailsService customerDetailsService;
@@ -31,14 +33,17 @@ public class ProfileController {
     @Autowired
     private ReviewService reviewService;
 
+    @Override
     @GetMapping("/profile")
     public String showProfilePage(@RequestParam(value = "error", required = false) String error,
                                   @RequestParam(value = "success", required = false) String success,
                                   Model model) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         CustomerDTO customerDTO = customerDetailsService.getCustomerByEmail(user.getUsername());
+
         List<OrderDTO> confirmedOrders = orderService.getOrdersByCustomerAndStatus(customerDTO.getId(), OrderStatus.CONFIRMED);
         List<OrderDTO> unconfirmedOrders = orderService.getOrdersByCustomerAndStatus(customerDTO.getId(), OrderStatus.UNCONFIRMED);
+
         for (OrderDTO order : confirmedOrders) {
             List<OrderItemDTO> orderItems = orderService.getOrderItemsByOrderId(order.getId());
             order.setOrderItems(orderItems);
@@ -48,9 +53,11 @@ public class ProfileController {
             List<OrderItemDTO> orderItems = orderService.getOrderItemsByOrderId(order.getId());
             order.setOrderItems(orderItems);
         }
+
         model.addAttribute("customer", customerDTO);
         model.addAttribute("confirmedOrders", confirmedOrders);
         model.addAttribute("unconfirmedOrders", unconfirmedOrders);
+
         if (error != null) {
             model.addAttribute("exception", error);
         }
@@ -60,9 +67,10 @@ public class ProfileController {
 
         return "Profile";
     }
+
+    @Override
     @PostMapping("/profile/confirm-order")
     public String confirmOrder(@RequestParam("orderId") Long orderId, RedirectAttributes redirectAttributes) {
-
         try {
             orderService.confirmOrder(orderId);
             redirectAttributes.addAttribute("success", "Заказ успешно подтвержден.");
@@ -73,6 +81,7 @@ public class ProfileController {
         return "redirect:/profile";
     }
 
+    @Override
     @PostMapping("/profile/add-review")
     public String addReview(@RequestParam("orderId") Long orderId,
                             @RequestParam("productId") Long productId,
@@ -91,7 +100,7 @@ public class ProfileController {
             reviewService.addReview(customerId, productId, rating, reviewText);
             redirectAttributes.addAttribute("success", "Отзыв успешно добавлен.");
         }
+
         return "redirect:/profile";
     }
-
 }

@@ -2,6 +2,7 @@ package com.example.clothingstore.controller;
 
 import com.example.clothingstore.dto.ProductDTO;
 import com.example.clothingstore.service.impl.OrderService;
+import com.example.clothingstore_contracts.controller.PopularProductsControllerContract;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,18 +12,22 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
-public class PopularProductsController {
+public class PopularProductsController implements PopularProductsControllerContract {
 
     @Autowired
     private OrderService orderService;
 
+    @Override
     @GetMapping("/popular-products")
     public String showPopularProductsPage(Model model) {
         String currentSeason = getCurrentSeason();
         model.addAttribute("currentSeason", currentSeason);
+
         List<ProductDTO> popularProducts = orderService.getPopularProductsForSeason(currentSeason);
+
         List<ProductDTO> topThreeProducts = popularProducts.size() > 3 ? popularProducts.subList(0, 3) : popularProducts;
         model.addAttribute("topThreeProducts", topThreeProducts);
+
         List<ProductDTO> otherProducts = popularProducts.size() > 3 ? popularProducts.subList(3, popularProducts.size()) : List.of();
         model.addAttribute("otherProducts", otherProducts);
 

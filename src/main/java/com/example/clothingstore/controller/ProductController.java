@@ -1,19 +1,19 @@
 package com.example.clothingstore.controller;
 
-import com.example.clothingstore.dto.CategoryDTO;
 import com.example.clothingstore.dto.ProductDTO;
 import com.example.clothingstore.service.impl.CategoryService;
 import com.example.clothingstore.service.impl.ProductService;
+import com.example.clothingstore_contracts.controller.ProductControllerContract;
+import com.example.clothingstore_contracts.viewmodel.ProductViewModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 @Controller
-public class ProductController {
+public class ProductController implements ProductControllerContract {
 
     private final ProductService productService;
     private final CategoryService categoryService;
@@ -24,16 +24,7 @@ public class ProductController {
         this.categoryService = categoryService;
     }
 
-    @Secured("ROLE_ADMIN")
-    @GetMapping("/add-product")
-    public String showAddProductPage(Model model) {
-        List<CategoryDTO> categories = categoryService.getAllCategories();
-        model.addAttribute("categories", categories);
-        return "add-product";
-    }
-
-    @Secured("ROLE_ADMIN")
-    @PostMapping("/add-product")
+    @Override
     public String addProduct(@RequestParam String name,
                              @RequestParam Double price,
                              @RequestParam Integer stock,
@@ -50,35 +41,37 @@ public class ProductController {
         return "redirect:/store";
     }
 
-    @Secured("ROLE_ADMIN")
-    @GetMapping("/edit-product/{id}")
-    public String showEditProductPage(@PathVariable Long id, Model model) {
-        ProductDTO productDTO = productService.getProductById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+    @Override
+    public String editProduct(@PathVariable Long id, @ModelAttribute ProductViewModel productViewModel) {
+        ProductDTO updatedProductDTO = new ProductDTO();
+        updatedProductDTO.setId(id);
+        updatedProductDTO.setName(productViewModel.getName());
+        updatedProductDTO.setPrice(productViewModel.getPrice());
+        updatedProductDTO.setStock(productViewModel.getStock());
+        updatedProductDTO.setCategoryId(productViewModel.getCategoryId());
 
-        List<CategoryDTO> categories = categoryService.getAllCategories();
-
-        // Добавляем в модель
-        model.addAttribute("product", productDTO);
-        model.addAttribute("categories", categories);
-
-        return "edit-product";
-    }
-
-    @Secured("ROLE_ADMIN")
-    @PostMapping("/edit-product/{id}")
-    public String editProduct(@PathVariable Long id, @ModelAttribute ProductDTO updatedProductDTO) {
         productService.updateProduct(id, updatedProductDTO);
 
         return "redirect:/store";
     }
 
-    @Secured("ROLE_ADMIN")
-    @GetMapping("/delete-product/{id}")
+    @Override
+    public String showAddProductPage(Model model) {
+        model.addAttribute("categories", categoryService.getAllCategories());
+        return "add-product";
+    }
+
+    @Override
+    public String showEditProductPage(@PathVariable Long id, Model model) {
+        ProductDTO productDTO = productService.getProductById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        model.addAttribute("product", productDTO);
+        return "edit-product";
+    }
+
+    @Override
     public String deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
-
         return "redirect:/store";
     }
 }
-
