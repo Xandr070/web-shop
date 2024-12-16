@@ -1,16 +1,17 @@
+// ShoppingCartController.java в основном проекте
 package com.example.clothingstore.controller;
 
 import com.example.clothingstore.service.impl.OrderService;
 import com.example.clothingstore.service.impl.CustomerDetailsService;
+import com.example.clothingstore_contracts.controller.ShoppingCartControllerContract;
+import com.example.clothingstore_contracts.input.AddToCartInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-public class ShoppingCartController {
+public class ShoppingCartController implements ShoppingCartControllerContract {
 
     @Autowired
     private OrderService orderService;
@@ -19,13 +20,14 @@ public class ShoppingCartController {
     private CustomerDetailsService customerDetailsService;
 
     @PostMapping("/cart/add")
-    public String addToCart(@RequestParam Long productId, @RequestParam int quantity, Model model) {
+    @Override
+    public String addToCart(AddToCartInput addToCartInput) {
         String username = getCurrentUsername();
         Long customerId = customerDetailsService.getCustomerIdByEmail(username);
 
-        orderService.addProductToUnconfirmedOrder(customerId, productId, quantity);
+        orderService.addProductToUnconfirmedOrder(customerId, addToCartInput.getProductId(), addToCartInput.getQuantity());
 
-        return "redirect:/product?productId=" + productId;
+        return "redirect:/product?productId=" + addToCartInput.getProductId();
     }
 
     private String getCurrentUsername() {

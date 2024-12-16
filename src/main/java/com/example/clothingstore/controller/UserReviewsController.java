@@ -5,6 +5,7 @@ import com.example.clothingstore.service.impl.ReviewService;
 import com.example.clothingstore.service.impl.ProductService;
 import com.example.clothingstore.dto.ProductDTO;
 import com.example.clothingstore.dto.ReviewDTO;
+import com.example.clothingstore_contracts.controller.UserReviewsControllerContract;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,16 +17,13 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-public class UserReviewsController {
+public class UserReviewsController implements UserReviewsControllerContract {
 
     @Autowired
     private ReviewService reviewService;
 
     @Autowired
     private ProductService productService;
-
-    @Autowired
-    private CustomerDetailsService customerDetailsService;
 
     @GetMapping("/user-reviews")
     public String showUserReviewsPage(@RequestParam Long customerId, Model model) {
