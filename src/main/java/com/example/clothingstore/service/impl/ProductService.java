@@ -10,6 +10,8 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -52,6 +54,7 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "products", key = "#categoryId")
     public List<ProductDTO> getProductsByCategory(Long categoryId) {
         return productRepository.findByCategoryId(categoryId).stream()
                 .map(this::convertToDTO)
@@ -103,7 +106,7 @@ public class ProductService {
         return convertToDTO(updatedProduct);
     }
 
-
+    @Cacheable(value = "products", key = "#categoryName")
     public List<ProductDTO> getProductsByCategoryName(String categoryName) {
         return productRepository.findByCategoryName(categoryName).stream()
                 .map(this::convertToDTO)
