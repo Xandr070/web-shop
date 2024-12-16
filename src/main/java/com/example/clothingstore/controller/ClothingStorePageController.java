@@ -1,8 +1,10 @@
 package com.example.clothingstore.controller;
 
 import com.example.clothingstore.dto.CategoryDTO;
-import com.example.clothingstore.dto.ProductDTO;
 import com.example.clothingstore.dto.OrderDTO;
+import com.example.clothingstore.dto.ProductDTO;
+import com.example.clothingstore_contracts.controller.ClothingStorePageControllerContract;
+
 import com.example.clothingstore.service.impl.CategoryService;
 import com.example.clothingstore.service.impl.CustomerDetailsService;
 import com.example.clothingstore.service.impl.OrderService;
@@ -20,7 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import java.util.List;
 
 @Controller
-public class ClothingStorePageController {
+public class ClothingStorePageController implements ClothingStorePageControllerContract {
 
     @Autowired
     private ProductService productService;
@@ -34,6 +36,7 @@ public class ClothingStorePageController {
     @Autowired
     private OrderService orderService;
 
+    @Override
     @GetMapping("/store")
     public String showStorePage(
             @RequestParam(required = false) Long categoryId,
@@ -71,6 +74,7 @@ public class ClothingStorePageController {
         }
     }
 
+    @Override
     @GetMapping("/product")
     public String showProductPage(@RequestParam Long productId, Model model) {
         ProductDTO product = productService.getProductById(productId)
@@ -84,11 +88,12 @@ public class ClothingStorePageController {
 
         model.addAttribute("product", product);
         model.addAttribute("relatedProducts", relatedProducts);
-        model.addAttribute("isAdmin", isAdmin); // Добавляем флаг isAdmin в модель
+        model.addAttribute("isAdmin", isAdmin);
 
         return "ProductDetails";
     }
 
+    @Override
     @PostMapping("/add-to-cart")
     public String addToCart(@RequestParam Long productId, @RequestParam int quantity, Model model) {
         String username = getCurrentUsername();
@@ -99,6 +104,7 @@ public class ClothingStorePageController {
         return "redirect:/store";
     }
 
+    @Override
     @GetMapping("/profile/orders")
     public String showOrders(Model model) {
         String username = getCurrentUsername();
