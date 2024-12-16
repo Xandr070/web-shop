@@ -3,6 +3,7 @@ package com.example.clothingstore.config;
 import com.example.clothingstore.service.impl.CustomerDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,7 +14,8 @@ public class SecurityConfig {
 
     private final CustomerDetailsService customerDetailsService;
 
-    public SecurityConfig(CustomerDetailsService customerDetailsService) {
+    // Используем @Lazy для отложенной инъекции бина
+    public SecurityConfig(@Lazy CustomerDetailsService customerDetailsService) {
         this.customerDetailsService = customerDetailsService;
     }
 
@@ -38,7 +40,7 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .permitAll()
                 )
-                .userDetailsService(customerDetailsService);
+                .userDetailsService(customerDetailsService);  // Используем отложенную инициализацию
 
         return http.build();
     }

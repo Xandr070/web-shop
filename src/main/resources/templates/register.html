@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Register</title>
     <style>
         body {
@@ -29,7 +29,7 @@
             margin-bottom: 8px;
             color: #028F84;
         }
-        input[type="text"], input[type="email"], input[type="password"] {
+        input[type="text"], input[type="email"], input[type="password"], input[type="tel"] {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -62,28 +62,47 @@
         .link a:hover {
             text-decoration: underline;
         }
+        .error {
+            color: red;
+            font-size: 12px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Register</h1>
-    <form th:action="@{/register}" th:object="${customer}" method="post">
-        <label for="name">Name:</label>
-        <input type="text" id="name" th:field="*{name}" required>
 
+    <!-- Форма регистрации -->
+    <form th:action="@{/register}" th:object="${customer}" method="post">
+
+        <!-- Поле для имени пользователя -->
+        <label for="username">Username:</label>
+        <input type="text" id="username" th:field="*{name}" required>
+        <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Error</div>
+
+        <!-- Поле для email -->
         <label for="email">Email:</label>
         <input type="email" id="email" th:field="*{email}" required>
+        <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Error</div>
 
-        <label for="phone">Phone:</label>
-        <input type="text" id="phone" th:field="*{phone}" required>
-
+        <!-- Поле для пароля -->
         <label for="password">Password:</label>
         <input type="password" id="password" th:field="*{password}" required>
+        <div class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Error</div>
 
+        <!-- Поле для телефона -->
+        <label for="phone">Phone:</label>
+        <input type="tel" id="phone" th:field="*{phone}" required>
+        <div class="error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}">Error</div>
+
+        <!-- Кнопка отправки формы -->
         <button type="submit">Register</button>
     </form>
 
+    <!-- Ссылка для перехода на страницу входа -->
     <div class="link">
         <p>Already have an account? <a th:href="@{/login}">Login here</a></p>
     </div>

@@ -1,9 +1,9 @@
 package com.example.clothingstore.controller;
 
-import com.example.clothingstore.entity.Customer;
-import com.example.clothingstore.repository.CustomerRepository;
+import com.example.clothingstore_contracts.controller.AuthControllerContract;
+import com.example.clothingstore_contracts.input.CustomerInput;
+import com.example.clothingstore.service.impl.CustomerDetailsService;
 import jakarta.validation.Valid;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -11,41 +11,37 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.Collections;
-import java.util.HashSet;
-
 @Controller
-public class AuthController {
+public class AuthController implements AuthControllerContract {
 
-    private final CustomerRepository customerRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final CustomerDetailsService customerDetailsService;
 
-    public AuthController(CustomerRepository customerRepository, PasswordEncoder passwordEncoder) {
-        this.customerRepository = customerRepository;
-        this.passwordEncoder = passwordEncoder;
+    public AuthController(CustomerDetailsService customerDetailsService) {
+        this.customerDetailsService = customerDetailsService;
     }
 
-    @GetMapping("/login")
+    @Override
     public String login() {
         return "login";
     }
 
+    @Override
     @GetMapping("/register")
     public String register(Model model) {
-        model.addAttribute("customer", new Customer());
+        model.addAttribute("customer", new CustomerInput());
         return "register";
     }
 
+    @Override
     @PostMapping("/register")
-    public String register(@Valid @ModelAttribute Customer customer, BindingResult bindingResult) {
+    public String register(@Valid @ModelAttribute("customer") CustomerInput customerInput,
+                           BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             return "register";
         }
-        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
-        customer.setRoles(new HashSet<>(Collections.singleton("ROLE_USER")));
-        customerRepository.save(customer);
+
+        customerDetailsService.registerCustomer(customerInput);
+
         return "redirect:/login";
     }
-
 }
-
