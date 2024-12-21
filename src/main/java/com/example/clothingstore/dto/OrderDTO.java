@@ -2,6 +2,7 @@ package com.example.clothingstore.dto;
 
 import com.example.clothingstore.entity.OrderStatus;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 

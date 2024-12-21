@@ -1,6 +1,8 @@
 package com.example.clothingstore.dto;
 
-public class ProductDTO {
+import java.io.Serializable;
+
+public class ProductDTO implements Serializable {
     private Long id;
     private String name;
     private Double price;

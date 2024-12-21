@@ -10,8 +10,6 @@ import com.example.clothingstore.repository.OrderItemRepository;
 import com.example.clothingstore.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -115,7 +113,6 @@ public class OrderService {
         }).collect(Collectors.toList());
     }
 
-    @Cacheable(value = "orders", key = "#customerId + '_' + #status")
     public List<OrderDTO> getOrdersByCustomerAndStatus(Long customerId, OrderStatus status) {
         List<Order> orders = orderRepository.findByCustomerAndStatusOrderByOrderDateDesc(
                 customerRepository.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found")),
