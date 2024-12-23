@@ -14,7 +14,6 @@ public class SecurityConfig {
 
     private final CustomerDetailsService customerDetailsService;
 
-    // Используем @Lazy для отложенной инъекции бина
     public SecurityConfig(@Lazy CustomerDetailsService customerDetailsService) {
         this.customerDetailsService = customerDetailsService;
     }
@@ -40,7 +39,7 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .permitAll()
                 )
-                .userDetailsService(customerDetailsService);  // Используем отложенную инициализацию
+                .userDetailsService(customerDetailsService);
 
         return http.build();
     }

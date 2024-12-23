@@ -5,7 +5,6 @@ import com.example.clothingstore.repository.CustomerRepository;
 import com.example.clothingstore_contracts.input.CustomerInput;
 import com.example.clothingstore.dto.CustomerDTO;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
