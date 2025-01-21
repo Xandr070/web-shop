@@ -1,5 +1,6 @@
 package com.example.clothingstore.controller;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.example.clothingstore.dto.ProductDTO;
 import com.example.clothingstore.service.impl.OrderService;
 import com.example.clothingstore_contracts.controller.PopularProductsControllerContract;
@@ -14,6 +15,8 @@ import java.util.List;
 @Controller
 public class PopularProductsController implements PopularProductsControllerContract {
 
+    private static final Logger logger = LoggerFactory.getLogger(PopularProductsController.class);
+
     @Autowired
     private OrderService orderService;
 
@@ -21,14 +24,19 @@ public class PopularProductsController implements PopularProductsControllerContr
     @GetMapping("/popular-products")
     public String showPopularProductsPage(Model model) {
         String currentSeason = getCurrentSeason();
-        model.addAttribute("currentSeason", currentSeason);
+        logger.info("Просмотр популярных продуктов для сезона: {}", currentSeason);
 
         List<ProductDTO> popularProducts = orderService.getPopularProductsForSeason(currentSeason);
+        logger.debug("Популярные продукты: {}", popularProducts);
 
         List<ProductDTO> topThreeProducts = popularProducts.size() > 3 ? popularProducts.subList(0, 3) : popularProducts;
-        model.addAttribute("topThreeProducts", topThreeProducts);
-
         List<ProductDTO> otherProducts = popularProducts.size() > 3 ? popularProducts.subList(3, popularProducts.size()) : List.of();
+
+        logger.debug("Топ-3 продуктов: {}", topThreeProducts);
+        logger.debug("Остальные продукты: {}", otherProducts);
+
+        model.addAttribute("currentSeason", currentSeason);
+        model.addAttribute("topThreeProducts", topThreeProducts);
         model.addAttribute("otherProducts", otherProducts);
 
         return "PopularProductsPage";

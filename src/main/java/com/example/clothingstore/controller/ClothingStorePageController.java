@@ -1,4 +1,6 @@
 package com.example.clothingstore.controller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.example.clothingstore.dto.CategoryDTO;
 import com.example.clothingstore.dto.OrderDTO;
@@ -24,6 +26,8 @@ import java.util.List;
 @Controller
 public class ClothingStorePageController implements ClothingStorePageControllerContract {
 
+    private static final Logger logger = LoggerFactory.getLogger(ClothingStorePageController.class);
+
     @Autowired
     private ProductService productService;
 
@@ -46,19 +50,23 @@ public class ClothingStorePageController implements ClothingStorePageControllerC
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
+        logger.info("Пользователь '{}' открыл страницу магазина.", username);
 
         Long customerId = customerDetailsService.getCustomerIdByEmail(username);
+        logger.debug("Идентификатор клиента: {}", customerId);
 
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
 
-        model.addAttribute("CustomerId", customerId);
-        model.addAttribute("isAdmin", isAdmin);
-
         List<CategoryDTO> categories = categoryService.getAllCategories();
-        model.addAttribute("categories", categories);
+        logger.debug("Загружены категории: {}", categories);
 
         List<ProductDTO> products = getFilteredProducts(categoryId, minPrice, maxPrice);
+        logger.debug("Загружены продукты: {}", products);
+
+        model.addAttribute("CustomerId", customerId);
+        model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("categories", categories);
         model.addAttribute("products", products);
 
         return "Main";
@@ -97,10 +105,12 @@ public class ClothingStorePageController implements ClothingStorePageControllerC
     @PostMapping("/add-to-cart")
     public String addToCart(@RequestParam Long productId, @RequestParam int quantity, Model model) {
         String username = getCurrentUsername();
-        Long customerId = customerDetailsService.getCustomerIdByEmail(username);
+        logger.info("Пользователь '{}' добавляет продукт '{}' в корзину (количество: {}).", username, productId, quantity);
 
+        Long customerId = customerDetailsService.getCustomerIdByEmail(username);
         orderService.addProductToUnconfirmedOrder(customerId, productId, quantity);
 
+        logger.info("Продукт '{}' успешно добавлен в корзину пользователя '{}'.", productId, username);
         return "redirect:/store";
     }
 
@@ -108,10 +118,15 @@ public class ClothingStorePageController implements ClothingStorePageControllerC
     @GetMapping("/profile/orders")
     public String showOrders(Model model) {
         String username = getCurrentUsername();
+        logger.info("Пользователь '{}' просматривает свои заказы.", username);
+
         Long customerId = customerDetailsService.getCustomerIdByEmail(username);
 
         List<OrderDTO> unconfirmedOrders = orderService.getOrdersByCustomerAndStatus(customerId, OrderStatus.UNCONFIRMED);
         List<OrderDTO> confirmedOrders = orderService.getOrdersByCustomerAndStatus(customerId, OrderStatus.CONFIRMED);
+
+        logger.debug("Неподтвержденные заказы: {}", unconfirmedOrders);
+        logger.debug("Подтвержденные заказы: {}", confirmedOrders);
 
         model.addAttribute("unconfirmedOrders", unconfirmedOrders);
         model.addAttribute("confirmedOrders", confirmedOrders);
